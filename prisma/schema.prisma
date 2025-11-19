@@ -1,0 +1,14 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ref_projects {
+  id                  Int     @id(map: "ref_projects_pk") @default(autoincrement())
+  project_name        String  @db.VarChar
+  project_description String? @db.VarChar
+}
