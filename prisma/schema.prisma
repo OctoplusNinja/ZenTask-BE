@@ -11,3 +11,111 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Workspace {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  plan      String   @default("Free")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  spaces  Space[]
+  members WorkspaceMember[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  initials  String
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  workspaces    WorkspaceMember[]
+  assignedTasks TaskAssignee[]
+}
+
+model WorkspaceMember {
+  workspaceId String
+  userId      String
+  role        String   @default("member")
+  joinedAt    DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, userId])
+}
+
+model Space {
+  id          String   @id @default(uuid())
+  workspaceId String
+  name        String
+  color       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  boards    Board[]
+}
+
+model Board {
+  id        String   @id @default(uuid())
+  spaceId   String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  space Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+  tasks Task[]
+}
+
+model Task {
+  id        String    @id
+  boardId   String
+  title     String
+  col       String    @default("backlog")
+  priority  Int       @default(1)
+  due       DateTime?
+  tags      String[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  board     Board          @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  assignees TaskAssignee[]
+  subtasks  Subtask[]
+  linksFrom TaskLink[]     @relation("fromTask")
+  linksTo   TaskLink[]     @relation("toTask")
+}
+
+model TaskAssignee {
+  taskId String
+  userId String
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+}
+
+model Subtask {
+  id         String   @id @default(uuid())
+  taskId     String
+  title      String
+  done       Boolean  @default(false)
+  assigneeId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model TaskLink {
+  id     String @id @default(uuid())
+  fromId String
+  toId   String
+  kind   String
+
+  from Task @relation("fromTask", fields: [fromId], references: [id], onDelete: Cascade)
+  to   Task @relation("toTask", fields: [toId], references: [id], onDelete: Cascade)
+}
