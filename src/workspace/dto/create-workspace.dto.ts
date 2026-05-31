@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateWorkspaceDto {
   @IsString()
@@ -9,7 +9,9 @@ export class CreateWorkspaceDto {
   @IsNotEmpty()
   slug!: string;
 
-  @IsString()
-  @IsOptional()
-  plan?: string;
+  @IsIn(['free', 'starter', 'business'])
+  plan!: string;
+
+  @IsIn(['roadmap', 'sprint', 'marketing', 'blank'])
+  template!: string;
 }

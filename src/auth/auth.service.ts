@@ -3,14 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UserService } from '../user/user.service';
 import { RegisterDto } from './dto/register.dto';
-import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -39,23 +37,11 @@ export class AuthService {
       passwordHash,
     });
 
-    const workspace = await this.prisma.db.workspace.create({
-      data: {
-        name: dto.wsName,
-        slug: dto.wsSlug,
-        plan: dto.plan,
-        members: {
-          create: { userId: user.id },
-        },
-      },
-    });
-
     const { passwordHash: _, ...safeUser } = user;
     const payload = { sub: user.id, email: user.email };
     return {
       access_token: this.jwtService.sign(payload),
       user: safeUser,
-      workspace,
     };
   }
 }

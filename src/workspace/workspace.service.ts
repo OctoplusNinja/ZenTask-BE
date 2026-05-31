@@ -19,8 +19,15 @@ export class WorkspaceService {
     return workspace;
   }
 
-  create(dto: CreateWorkspaceDto) {
-    return this.prisma.db.workspace.create({ data: dto });
+  create(dto: CreateWorkspaceDto, userId: string) {
+    return this.prisma.db.workspace.create({
+      data: {
+        name: dto.name,
+        slug: dto.slug,
+        plan: dto.plan,
+        members: { create: { userId } },
+      },
+    });
   }
 
   async update(id: string, dto: UpdateWorkspaceDto) {
