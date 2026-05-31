@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { GoogleCodeDto } from './dto/google-code.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -11,6 +12,11 @@ export class AuthController {
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
+  }
+
+  @Post('google/code')
+  googleLogin(@Body() dto: GoogleCodeDto) {
+    return this.authService.googleLogin(dto.code);
   }
 
   @UseGuards(LocalAuthGuard)
