@@ -52,11 +52,9 @@ export class AuthService {
     const clientId = this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID');
     const clientSecret = this.configService.getOrThrow<string>('GOOGLE_CLIENT_SECRET');
     const client = new OAuth2Client(clientId, clientSecret);
-    const { tokens } = await client
-      .getToken({ code, redirect_uri: 'http://localhost:3000/auth/google/callback' })
-      .catch(() => {
-        throw new UnauthorizedException('Invalid or expired Google auth code');
-      });
+    const { tokens } = await client.getToken({ code, redirect_uri: 'postmessage' }).catch(() => {
+      throw new UnauthorizedException('Invalid or expired Google auth code');
+    });
     const { id_token } = tokens;
     if (!id_token) throw new UnauthorizedException('No ID token returned');
     const ticket = await client.verifyIdToken({ idToken: id_token, audience: clientId });
